@@ -48,6 +48,50 @@ dist/root-usb-watchdog-0.1.0-x86_64-linux
 dist/root-usb-watchdog-0.1.0-x86_64-linux.sha256
 ```
 
+## Making a release
+
+Choose a version without a leading `v`, for example `0.2.0`. Update that
+version in both of these files:
+
+- `root-usb-watchdog.c`: change `PROGRAM_VERSION`.
+- `Makefile`: change the version checked by the `release` target and its error
+  message.
+
+The workflow does not need to be changed. It accepts a Git tag with a leading
+`v` and removes the prefix before passing the version to `make`.
+
+Build and test the release locally before tagging it:
+
+```bash
+make clean
+make release VERSION=0.2.0
+sha256sum --check dist/root-usb-watchdog-0.2.0-x86_64-linux.sha256
+```
+
+Commit the version change, push it, then create and push an annotated tag that
+points to that commit:
+
+```bash
+git add root-usb-watchdog.c Makefile
+git commit -m "Release v0.2.0"
+git push
+git tag -a v0.2.0 -m "Release v0.2.0"
+git push origin v0.2.0
+```
+
+On GitHub, open **Releases**, choose **Draft a new release**, select the pushed
+`v0.2.0` tag, and publish the release. Publishing triggers
+`.github/workflows/release.yml`. The workflow builds and tests the static
+x86-64 Linux executable, then attaches these files to the GitHub Release:
+
+```text
+root-usb-watchdog-0.2.0-x86_64-linux
+root-usb-watchdog-0.2.0-x86_64-linux.sha256
+```
+
+If the version in the tag does not match `PROGRAM_VERSION` and the Makefile
+check, the workflow fails instead of publishing incorrectly named files.
+
 ## Command line
 
 The default mapping is `/dev/mapper/cryptroot`:
