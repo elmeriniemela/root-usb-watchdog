@@ -1,0 +1,34 @@
+name: Release binary
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build x86_64 Linux binary
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install --yes build-essential libc6-dev systemd
+
+      - name: Build and test release
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          version="${TAG_NAME#v}"
+          test -n "$version"
+          make release VERSION="$version"
+
+      - name: Upload release files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG_NAME" dist/* --clobber
