@@ -1,0 +1,27 @@
+[Unit]
+Description=Power off when the root USB storage disappears
+Documentation=https://github.com/elmeriniemela/root-usb-watchdog
+After=local-fs.target
+Before=graphical.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/root-usb-watchdog --device /dev/mapper/cryptroot
+Restart=on-failure
+RestartSec=5s
+User=root
+LimitMEMLOCK=infinity
+CapabilityBoundingSet=CAP_IPC_LOCK CAP_SYS_BOOT
+NoNewPrivileges=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+RestrictRealtime=yes
+
+[Install]
+WantedBy=multi-user.target
